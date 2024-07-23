@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReactIO - Your Video Generator</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 20px;
+            font-size: 14px; /* Adjusted font size */
+        }
+        .container {
+            text-align: center;
+        }
+        .modal-body input {
+            margin-bottom: 10px;
+        }
+        #progressBarWrapper {
+            display: none;
+            margin-top: 20px;
+        }
+        #videoTableWrapper {
+            width: 80vw;
+            height: 50vh;
+            overflow: auto;
+            margin: 20px auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        #videoTable {
+            font-size: 12px; /* Adjusted font size */
+        }
+        #videoTable img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+        }
+        .btn-download {
+            font-size: 12px; /* Adjusted font size for buttons */
+        }
+        @media (max-width: 768px) {
+            #videoTable img {
+                width: 60px;
+                height: 60px;
+            }
+            body {
+                font-size: 12px; /* Adjusted font size for small screens */
+            }
+            .btn-download {
+                font-size: 10px; /* Smaller font size for buttons on small screens */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">ReactIO - Your Video Generator</h1>
+        <button id="getStartedBtn" class="btn btn-primary btn-lg">Get Started</button>
+        <button id="settingsBtn" class="btn btn-secondary btn-lg ml-2" data-toggle="modal" data-target="#settingsModal">Settings</button>
+
+        <!-- Progress Bar Wrapper -->
+        <div id="progressBarWrapper">
+            <div class="progress">
+                <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+        </div>
+
+        <!-- Video Table -->
+        <div id="videoTableWrapper">
+
+            <table id="videoTable" class="table table-striped table-sm">
+                <thead>
+                    <tr>
+                        <th>Filename</th>
+                        <th>Thumbnail</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Video rows will be inserted here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal fade" id="settingsModal" tabindex="-1" role="dialog" aria-labelledby="settingsModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="settingsModalLabel">Settings</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="settingsForm">
+                        <div class="form-group">
+                            <label for="youtubeEmail"><i class="fab fa-youtube"></i> YouTube Email</label>
+                            <input type="email" class="form-control" id="youtubeEmail" placeholder="Enter YouTube email">
+                        </div>
+                        <div class="form-group">
+                            <label for="youtubePassword"><i class="fas fa-key"></i> YouTube Password</label>
+                            <input type="password" class="form-control" id="youtubePassword" placeholder="Enter YouTube password">
+                        </div>
+                        <div class="form-group">
+                            <label for="tiktokEmail"><i class="fab fa-tiktok"></i> TikTok Email</label>
+                            <input type="email" class="form-control" id="tiktokEmail" placeholder="Enter TikTok email">
+                        </div>
+                        <div class="form-group">
+                            <label for="tiktokPassword"><i class="fas fa-key"></i> TikTok Password</label>
+                            <input type="password" class="form-control" id="tiktokPassword" placeholder="Enter TikTok password">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- JavaScript for handling cookies, progress, and video list -->
+    <script>
+        $(document).ready(function() {
+            // Load saved credentials from cookies
+            function getCookie(name) {
+                let value = `; ${document.cookie}`;
+                let parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+            }
+
+            $('#youtubeEmail').val(getCookie('youtubeEmail') || '');
+            $('#youtubePassword').val(getCookie('youtubePassword') || '');
+            $('#tiktokEmail').val(getCookie('tiktokEmail') || '');
+            $('#tiktokPassword').val(getCookie('tiktokPassword') || '');
+
+            $('#settingsForm').on('submit', function(event) {
+                event.preventDefault();
+                
+                // Save credentials to cookies
+                document.cookie = `youtubeEmail=${$('#youtubeEmail').val()}; path=/`;
+                document.cookie = `youtubePassword=${$('#youtubePassword').val()}; path=/`;
+                document.cookie = `tiktokEmail=${$('#tiktokEmail').val()}; path=/`;
+                document.cookie = `tiktokPassword=${$('#tiktokPassword').val()}; path=/`;
+
+                alert('Credentials saved!');
+                $('#settingsModal').modal('hide');
+            });
+
+            // Get Started Button Click Handler
+            $('#getStartedBtn').on('click', function() {
+                var $btn = $(this);
+                var $progressBarWrapper = $('#progressBarWrapper');
+                var $progressBar = $('#progressBar');
+                var maxProgress = 75; // Maximum progress percentage
+                var intervalDuration = 500; // Interval duration in milliseconds
+                var progress = 0;
+                var interval;
+
+                // Disable the button and show the progress bar
+                $btn.prop('disabled', true);
+                $progressBarWrapper.show();
+
+                // Simulate progress
+                interval = setInterval(function() {
+                    progress += 10;
+                    if (progress > maxProgress) progress = maxProgress; // Cap progress at maxProgress
+                    $progressBar.css('width', progress + '%').attr('aria-valuenow', progress);
+                    if (progress >= maxProgress) {
+                        clearInterval(interval);
+                    }
+                }, intervalDuration);
+
+                // Send GET request
+                $.ajax({
+                    url: `http://${window.location.hostname}:2006/init`,
+                    type: 'GET',
+                    success: function(response) {
+                        // On success
+                        console.log('Request succeeded with response:', response);
+                        $btn.prop('disabled', false); // Enable the button
+                        $progressBarWrapper.hide(); // Hide the progress bar
+                    },
+                    error: function(xhr, status, error) {
+                        // On error
+                        console.log('Request failed:', error);
+                        $btn.prop('disabled', false); // Enable the button
+                        $progressBarWrapper.hide(); // Hide the progress bar
+                    },
+                    timeout: 1200000 // 10 minutes timeout (600,000 milliseconds)
+                });
+            });
+
+            // Function to fetch and display video list
+            function fetchVideoList() {
+                $.ajax({
+                    url: `http://${window.location.hostname}:3000/videos`,
+                    type: 'GET',
+                    success: function(response) {
+                        console.log('Video list:', response);
+
+                        var $tbody = $('#videoTable tbody');
+                        $tbody.empty(); // Clear existing rows
+
+                        response.forEach(function(video) {
+                            var row = `
+                                <tr>
+                                    <td>${video.filename}</td>
+                                    <td><img src="${video.thumbnail}" alt="${video.filename}"></td>
+                                    <td>
+                                        <a href="http://${window.location.hostname}:3000/files/output/${video.filename}" class="btn btn-primary btn-download" download>
+                                            <i class="fas fa-download"></i> Download
+                                        </a>
+                                    </td>
+                                </tr>
+                            `;
+                            $tbody.append(row);
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.log('Failed to fetch video list:', error);
+                    }
+                });
+            }
+
+            // Fetch and display video list on page load
+            fetchVideoList();
+        });
+    </script>
+</body>
+</html>
